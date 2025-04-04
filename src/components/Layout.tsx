@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Grid2X2, FileText, Settings, Menu, X, Plus } from "lucide-react";
 import { Navbar } from "./Navbar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface NavItemProps {
   to: string;
@@ -73,13 +74,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           ))}
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-4">
           <Link to="/new-project">
             <Button className="w-full gap-2">
               <Plus className="h-4 w-4" />
               Novo Projeto
             </Button>
           </Link>
+          <div className="flex justify-end">
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 

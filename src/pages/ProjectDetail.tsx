@@ -14,7 +14,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, Plus } from "lucide-react";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -166,7 +166,7 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-6">
         <div className="flex items-center gap-2">
           <MetricCard metric={project.metrics.velocity} />
           <HoverCard>
@@ -253,6 +253,15 @@ export default function ProjectDetail() {
             </HoverCardContent>
           </HoverCard>
         </div>
+
+        {[1, 2, 3].map((index) => (
+          <div key={index} className="border-2 border-dashed rounded-lg p-4 flex items-center justify-center">
+            <Button variant="ghost" className="h-full w-full flex flex-col gap-2 text-muted-foreground">
+              <Plus className="h-6 w-6" />
+              <span className="text-sm">Adicionar Métrica</span>
+            </Button>
+          </div>
+        ))}
       </div>
 
       <Card>
