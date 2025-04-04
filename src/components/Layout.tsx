@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Grid2X2, FileText, Settings, Menu, X, Plus } from "lucide-react";
+import { Navbar } from "./Navbar";
 
 interface NavItemProps {
   to: string;
@@ -83,25 +84,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-background p-4 sm:static">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="sm:hidden"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
-          <div className="sm:hidden">
-            <h1 className="text-xl font-semibold">Métricas de Projeto</h1>
-          </div>
-        </div>
-        
+      <main className="flex-1">
+        <Navbar 
+          sidebarOpen={sidebarOpen}
+          onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
         <div className="container py-6">
           {children}
         </div>
