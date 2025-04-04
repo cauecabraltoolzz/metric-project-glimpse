@@ -1,26 +1,37 @@
-
-export type Metric = {
+export interface Metric {
   id: string;
   name: string;
-  value: number; // Percentage value (0-100)
-  target: number; // Target percentage
+  value: number;
+  target: number;
+  weight: number;
   trend: 'up' | 'down' | 'stable';
-  weight: number; // Weight in health score calculation (0-1)
-};
+}
 
-export type Project = {
+export interface Task {
+  id: string;
+  title: string;
+  pipefyLink: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  size: 'PP' | 'P' | 'M' | 'G' | 'GG';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Project {
   id: string;
   name: string;
   client: string;
   startDate: string;
-  healthScore: number; // 0-100
+  duration: number;
+  healthScore: number;
+  isNew: boolean;
+  tasks: Task[];
   metrics: {
-    deliveryRate: Metric;
-    reworkRate: Metric;
-    estimateAccuracy: Metric;
-    nps: Metric;
+    velocity: Metric;
+    quality: Metric;
+    engagement: Metric;
   };
-};
+}
 
 export type DeliveryStage = 'planning' | 'development' | 'testing' | 'review' | 'deployment';
 

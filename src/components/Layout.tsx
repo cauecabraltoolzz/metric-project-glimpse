@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Grid2X2, FileText, Settings, Menu, X } from "lucide-react";
+import { Grid2X2, FileText, Settings, Menu, X, Plus } from "lucide-react";
 
 interface NavItemProps {
   to: string;
@@ -73,6 +72,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           ))}
         </nav>
+        <div className="p-4 border-t">
+          <Link to="/new-project">
+            <Button className="w-full gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Projeto
+            </Button>
+          </Link>
+        </div>
       </aside>
 
       {/* Main content */}

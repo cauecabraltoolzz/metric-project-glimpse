@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Project } from "../types/project";
 import { HealthScoreBadge } from "./HealthScoreBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ArrowUp, ArrowDown, Circle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProjectCardProps {
   project: Project;
@@ -31,7 +31,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               <CardTitle className="text-lg font-semibold">{project.name}</CardTitle>
               <p className="text-sm text-muted-foreground">{project.client}</p>
             </div>
-            <HealthScoreBadge score={project.healthScore} />
+            <div className="flex flex-col items-end gap-2">
+              <HealthScoreBadge score={project.healthScore} />
+              {project.isNew && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  Novo Projeto
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { getProjects } from "../services/projectService";
 import { ProjectCard } from "../components/ProjectCard";
@@ -66,7 +65,7 @@ const Dashboard = () => {
       </div>
 
       {/* Projects grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredProjects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}

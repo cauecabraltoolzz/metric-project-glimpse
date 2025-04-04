@@ -1,34 +1,145 @@
-
-import React from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getProjectById } from "../services/projectService";
+import { projectService } from "@/services/projectService";
 import { HealthScoreBadge } from "../components/HealthScoreBadge";
 import { MetricCard } from "../components/MetricCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Project, Task } from "@/types/project";
+import { TaskManager } from "@/components/TaskManager";
+import { toast } from "sonner";
+import { Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const project = getProjectById(id || "");
-  
+  const [project, setProject] = useState<Project | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<Project> | null>(null);
+
+  useEffect(() => {
+    const loadProject = async () => {
+      if (id) {
+        try {
+          const data = await projectService.getProjectById(id);
+          if (data) {
+            setProject(data);
+            setEditData(data);
+          } else {
+            toast.error("Projeto não encontrado");
+            navigate("/");
+          }
+        } catch (error) {
+          toast.error("Erro ao carregar projeto");
+          console.error(error);
+        }
+      }
+    };
+    loadProject();
+  }, [id, navigate]);
+
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h1 className="text-2xl font-bold mb-4">Projeto Não Encontrado</h1>
-        <p className="text-muted-foreground mb-6">
-          O projeto que você está procurando não existe ou foi removido.
-        </p>
-        <Button onClick={() => navigate("/")}>
-          Voltar ao Painel
-        </Button>
+        <h1 className="text-2xl font-bold mb-4">Carregando...</h1>
       </div>
     );
   }
-  
+
+  const handleUpdateProject = async () => {
+    if (!id || !editData) return;
+
+    try {
+      const updatedProject = await projectService.updateProject(id, editData);
+      if (updatedProject) {
+        setProject(updatedProject);
+        setIsEditing(false);
+        toast.success("Projeto atualizado com sucesso!");
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar projeto");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!id) return;
+
+    try {
+      const success = await projectService.deleteProject(id);
+      if (success) {
+        toast.success("Projeto excluído com sucesso!");
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error("Erro ao excluir projeto");
+      console.error(error);
+    }
+  };
+
+  const handleAddTask = async (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
+    if (!id) return;
+
+    try {
+      const newTask = await projectService.addTask(id, task);
+      if (newTask && project) {
+        setProject({
+          ...project,
+          tasks: [...project.tasks, newTask],
+        });
+      }
+    } catch (error) {
+      toast.error("Erro ao adicionar tarefa");
+      console.error(error);
+    }
+  };
+
+  const handleUpdateTask = async (taskId: string, taskData: Partial<Task>) => {
+    if (!id) return;
+
+    try {
+      const updatedTask = await projectService.updateTask(id, taskId, taskData);
+      if (updatedTask && project) {
+        setProject({
+          ...project,
+          tasks: project.tasks.map((task) =>
+            task.id === taskId ? updatedTask : task
+          ),
+        });
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar tarefa");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!id) return;
+
+    try {
+      const success = await projectService.deleteTask(id, taskId);
+      if (success && project) {
+        setProject({
+          ...project,
+          tasks: project.tasks.filter((task) => task.id !== taskId),
+        });
+      }
+    } catch (error) {
+      toast.error("Erro ao excluir tarefa");
+      console.error(error);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       year: 'numeric', 
@@ -36,16 +147,9 @@ const ProjectDetail = () => {
       day: 'numeric'
     });
   };
-  
-  const handleExportReport = () => {
-    toast({
-      title: "Relatório Exportado",
-      description: "O relatório do projeto foi exportado com sucesso.",
-    });
-  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -62,41 +166,370 @@ const ProjectDetail = () => {
         </div>
         <div className="flex items-center gap-3">
           <HealthScoreBadge score={project.healthScore} size="lg" />
-          <Button onClick={handleExportReport}>Exportar Relatório</Button>
+          <Button onClick={() => toast.success("Relatório exportado com sucesso!")}>
+            Exportar Relatório
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard metric={project.metrics.deliveryRate} />
-        <MetricCard metric={project.metrics.reworkRate} inverted={true} />
-        <MetricCard metric={project.metrics.estimateAccuracy} />
-        <MetricCard metric={project.metrics.nps} />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <MetricCard metric={project.metrics.velocity} />
+        <MetricCard metric={project.metrics.quality} />
+        <MetricCard metric={project.metrics.engagement} />
       </div>
 
-      <div className="rounded-lg border bg-card p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">Análise do Health Score</h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          O health score do projeto é calculado com base nas métricas ponderadas:
-        </p>
-        <ul className="space-y-2 text-sm">
-          <li className="flex justify-between">
-            <span>Taxa de Entregas (30%)</span>
-            <span>{project.metrics.deliveryRate.value}% vs {project.metrics.deliveryRate.target}% meta</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Taxa de Retrabalho (25%)</span>
-            <span>{project.metrics.reworkRate.value}% vs {project.metrics.reworkRate.target}% meta</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Precisão das Estimativas (25%)</span>
-            <span>{project.metrics.estimateAccuracy.value}% vs {project.metrics.estimateAccuracy.target}% meta</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Pontuação NPS (20%)</span>
-            <span>{project.metrics.nps.value}% vs {project.metrics.nps.target}% meta</span>
-          </li>
-        </ul>
+      <Card>
+        <CardHeader>
+          <CardTitle>Análise do Health Score</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            O health score do projeto é calculado com base nas métricas ponderadas:
+          </p>
+          <ul className="space-y-2 text-sm">
+            <li className="flex justify-between">
+              <span>Velocidade (40%)</span>
+              <span>{project.metrics.velocity.value}% vs {project.metrics.velocity.target}% meta</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Qualidade (30%)</span>
+              <span>{project.metrics.quality.value}% vs {project.metrics.quality.target}% meta</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Engajamento (30%)</span>
+              <span>{project.metrics.engagement.value}% vs {project.metrics.engagement.target}% meta</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">{project.name}</h2>
+          <p className="text-muted-foreground">{project.client}</p>
+        </div>
+        <div className="flex gap-2">
+          <Dialog open={isEditing} onOpenChange={setIsEditing}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Pencil className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader className="text-center">
+                <DialogTitle className="text-2xl">Editar Projeto</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome do Projeto</Label>
+                    <Input
+                      id="name"
+                      value={editData?.name || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, name: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="client">Cliente</Label>
+                    <Input
+                      id="client"
+                      value={editData?.client || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, client: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">Data de Início</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={editData?.startDate || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, startDate: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Duração (meses)</Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      min="1"
+                      value={editData?.duration || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, duration: parseInt(e.target.value) })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Métricas</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="velocityValue">Velocidade (%)</Label>
+                      <Input
+                        id="velocityValue"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.velocity?.value || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              velocity: {
+                                ...editData?.metrics?.velocity,
+                                value: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="velocityTarget">Meta de Velocidade (%)</Label>
+                      <Input
+                        id="velocityTarget"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.velocity?.target || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              velocity: {
+                                ...editData?.metrics?.velocity,
+                                target: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="qualityValue">Qualidade (%)</Label>
+                      <Input
+                        id="qualityValue"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.quality?.value || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              quality: {
+                                ...editData?.metrics?.quality,
+                                value: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="qualityTarget">Meta de Qualidade (%)</Label>
+                      <Input
+                        id="qualityTarget"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.quality?.target || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              quality: {
+                                ...editData?.metrics?.quality,
+                                target: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="engagementValue">Engajamento (%)</Label>
+                      <Input
+                        id="engagementValue"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.engagement?.value || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              engagement: {
+                                ...editData?.metrics?.engagement,
+                                value: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="engagementTarget">Meta de Engajamento (%)</Label>
+                      <Input
+                        id="engagementTarget"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editData?.metrics?.engagement?.target || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            metrics: {
+                              ...editData?.metrics,
+                              engagement: {
+                                ...editData?.metrics?.engagement,
+                                target: parseInt(e.target.value),
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleUpdateProject}>Salvar</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Button
+            variant="destructive"
+            onClick={handleDeleteProject}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Excluir
+          </Button>
+        </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações do Projeto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p>
+                <span className="font-medium">Data de Início:</span>{" "}
+                {formatDate(project.startDate)}
+              </p>
+              <p>
+                <span className="font-medium">Duração:</span> {project.duration}{" "}
+                meses
+              </p>
+              <p>
+                <span className="font-medium">Health Score:</span>{" "}
+                {project.healthScore}%
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Métricas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Object.entries(project.metrics).map(([key, metric]) => (
+                <div key={key} className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="font-medium capitalize">
+                      {key.replace(/([A-Z])/g, " $1").trim()}
+                    </span>
+                    <span>{metric.value}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full">
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: `${metric.value}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Meta: {metric.target}%</span>
+                    <span>Peso: {(metric.weight * 100).toFixed(0)}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p>
+                <span className="font-medium">Tarefas:</span>{" "}
+                {project.tasks.length}
+              </p>
+              <p>
+                <span className="font-medium">Concluídas:</span>{" "}
+                {project.tasks.filter((task) => task.status === "completed").length}
+              </p>
+              <p>
+                <span className="font-medium">Em Andamento:</span>{" "}
+                {project.tasks.filter((task) => task.status === "in_progress").length}
+              </p>
+              <p>
+                <span className="font-medium">Pendentes:</span>{" "}
+                {project.tasks.filter((task) => task.status === "pending").length}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Tarefas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TaskManager
+            tasks={project.tasks}
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
