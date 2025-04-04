@@ -1,5 +1,39 @@
 import { Project, Metric, Task } from "../types/project";
 
+interface EngagementFactors {
+  meetingAttendance: number; // Porcentagem de presença em reuniões (0-100)
+  responseTime: number; // Tempo médio de resposta em horas (quanto menor, melhor)
+  contributions: number; // Número de contribuições/interações por semana
+  teamFeedback: number; // Avaliação média do time (0-100)
+}
+
+// Calcula o engajamento baseado nos fatores
+function calculateEngagement(factors: EngagementFactors): number {
+  // Pesos para cada fator
+  const weights = {
+    meetingAttendance: 0.3, // 30%
+    responseTime: 0.2, // 20%
+    contributions: 0.25, // 25%
+    teamFeedback: 0.25 // 25%
+  };
+
+  // Normaliza o tempo de resposta (converte para uma escala de 0-100)
+  // Considera que 24h é ruim (0) e 1h ou menos é ótimo (100)
+  const normalizedResponseTime = Math.max(0, Math.min(100, (24 - factors.responseTime) * (100/23)));
+
+  // Normaliza as contribuições (considera que 10 ou mais por semana é ótimo)
+  const normalizedContributions = Math.min(100, (factors.contributions / 10) * 100);
+
+  // Calcula o score final
+  const engagementScore = 
+    (factors.meetingAttendance * weights.meetingAttendance) +
+    (normalizedResponseTime * weights.responseTime) +
+    (normalizedContributions * weights.contributions) +
+    (factors.teamFeedback * weights.teamFeedback);
+
+  return Math.round(engagementScore);
+}
+
 // Calculate a health score from 0-100 based on metrics and their weights
 export const calculateHealthScore = (metrics: { [key: string]: Metric }): number => {
   const metricArray = Object.values(metrics);
@@ -44,7 +78,12 @@ export const getProjects = (): Project[] => {
         engagement: {
           id: "engagement",
           name: "Engajamento",
-          value: 92,
+          value: calculateEngagement({
+            meetingAttendance: 95, // 95% de presença em reuniões
+            responseTime: 2, // 2 horas em média para responder
+            contributions: 8, // 8 contribuições por semana
+            teamFeedback: 90 // Feedback positivo do time
+          }),
           target: 90,
           trend: "up",
           weight: 0.3,

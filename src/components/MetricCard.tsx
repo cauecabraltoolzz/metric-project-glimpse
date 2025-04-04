@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Metric } from "../types/project";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,14 +46,23 @@ export const MetricCard: React.FC<MetricCardProps> = ({ metric, inverted = false
     }
   };
 
+  const getStatusColor = (value: number, target: number) => {
+    const ratio = value / target;
+    if (ratio >= 1) return "text-green-500 dark:text-green-400";
+    if (ratio >= 0.8) return "text-yellow-500 dark:text-yellow-400";
+    return "text-red-500 dark:text-red-400";
+  };
+
   return (
-    <Card>
+    <Card className="bg-card text-card-foreground dark:border-gray-800">
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-3">
           <div>
             <h3 className="font-medium text-sm">{metric.name}</h3>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-2xl font-semibold">{metric.value}%</span>
+              <span className={`text-2xl font-semibold ${getStatusColor(metric.value, metric.target)}`}>
+                {metric.value}%
+              </span>
               {getTrendIcon()}
             </div>
           </div>
