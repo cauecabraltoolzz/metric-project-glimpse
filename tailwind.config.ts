@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Health score colors
+				health: {
+					excellent: '#22c55e', // green
+					good: '#84cc16',      // lime
+					average: '#f59e0b',   // amber
+					poor: '#ef4444',      // red
 				}
 			},
 			borderRadius: {
