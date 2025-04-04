@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Project } from "@/types/project";
 import { projectService } from "@/services/projectService";
@@ -17,31 +17,55 @@ import {
 import { ArrowLeft, Info } from "lucide-react";
 
 export default function ProjectDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadProject() {
+      if (!id) {
+        setError("ID do projeto não fornecido");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
-        if (id) {
-          const projectData = await projectService.getProjectById(id);
+        setError(null);
+        console.log("Carregando projeto com ID:", id); // Debug
+        const projectData = await projectService.getProjectById(id);
+        console.log("Dados do projeto:", projectData); // Debug
+        
+        if (isMounted) {
           if (projectData) {
             setProject(projectData);
           } else {
+            setError("Projeto não encontrado");
             toast.error("Projeto não encontrado");
           }
         }
       } catch (error) {
         console.error("Erro ao carregar projeto:", error);
-        toast.error("Erro ao carregar projeto");
+        if (isMounted) {
+          setError("Erro ao carregar projeto");
+          toast.error("Erro ao carregar projeto");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadProject();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleAddTask = async (task: any) => {

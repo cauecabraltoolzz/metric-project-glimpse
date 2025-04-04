@@ -279,105 +279,151 @@ export const getHealthScoreClassification = (score: number): {
 
 export const projectService = {
   getProjects: async (): Promise<Project[]> => {
-    return Promise.resolve(getProjects());
+    try {
+      const projects = getProjects();
+      console.log("Projetos carregados:", projects); // Debug
+      return Promise.resolve(projects);
+    } catch (error) {
+      console.error("Erro ao carregar projetos:", error);
+      return Promise.reject(error);
+    }
   },
 
   getProjectById: async (id: string): Promise<Project | undefined> => {
-    return Promise.resolve(getProjectById(id));
+    try {
+      console.log("Buscando projeto com ID:", id); // Debug
+      const project = getProjectById(id);
+      console.log("Projeto encontrado:", project); // Debug
+      return Promise.resolve(project);
+    } catch (error) {
+      console.error("Erro ao buscar projeto:", error);
+      return Promise.reject(error);
+    }
   },
 
   createProject: async (projectData: Omit<Project, "id" | "healthScore" | "isNew">): Promise<Project> => {
-    return Promise.resolve(createProject(projectData));
+    try {
+      const newProject = createProject(projectData);
+      return Promise.resolve(newProject);
+    } catch (error) {
+      console.error("Erro ao criar projeto:", error);
+      return Promise.reject(error);
+    }
   },
 
   updateProject: async (id: string, projectData: Partial<Project>): Promise<Project | undefined> => {
-    const projects = getProjects();
-    const projectIndex = projects.findIndex(project => project.id === id);
-    if (projectIndex === -1) return Promise.resolve(undefined);
+    try {
+      const projects = getProjects();
+      const projectIndex = projects.findIndex(project => project.id === id);
+      if (projectIndex === -1) {
+        console.log("Projeto não encontrado para atualização:", id); // Debug
+        return Promise.resolve(undefined);
+      }
 
-    const updatedProject = {
-      ...projects[projectIndex],
-      ...projectData,
-      healthScore: projectData.metrics 
-        ? calculateHealthScore(projectData.metrics)
-        : projects[projectIndex].healthScore,
-    };
+      const updatedProject = {
+        ...projects[projectIndex],
+        ...projectData,
+        healthScore: projectData.metrics 
+          ? calculateHealthScore(projectData.metrics)
+          : projects[projectIndex].healthScore,
+      };
 
-    const updatedProjects = [
-      ...projects.slice(0, projectIndex),
-      updatedProject,
-      ...projects.slice(projectIndex + 1),
-    ];
-
-    return Promise.resolve(updatedProject);
+      console.log("Projeto atualizado:", updatedProject); // Debug
+      return Promise.resolve(updatedProject);
+    } catch (error) {
+      console.error("Erro ao atualizar projeto:", error);
+      return Promise.reject(error);
+    }
   },
 
   deleteProject: async (id: string): Promise<boolean> => {
-    const projects = getProjects();
-    const projectIndex = projects.findIndex(project => project.id === id);
-    if (projectIndex === -1) return Promise.resolve(false);
+    try {
+      const projects = getProjects();
+      const projectIndex = projects.findIndex(project => project.id === id);
+      if (projectIndex === -1) {
+        console.log("Projeto não encontrado para exclusão:", id); // Debug
+        return Promise.resolve(false);
+      }
 
-    const updatedProjects = projects.filter((_, index) => index !== projectIndex);
-    return Promise.resolve(true);
+      return Promise.resolve(true);
+    } catch (error) {
+      console.error("Erro ao excluir projeto:", error);
+      return Promise.reject(error);
+    }
   },
 
   addTask: async (projectId: string, task: Omit<Task, "id" | "createdAt" | "updatedAt">): Promise<Task | undefined> => {
-    const projects = getProjects();
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return Promise.resolve(undefined);
+    try {
+      const projects = getProjects();
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        console.log("Projeto não encontrado para adicionar tarefa:", projectId); // Debug
+        return Promise.resolve(undefined);
+      }
 
-    const newTask: Task = {
-      ...task,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      const newTask: Task = {
+        ...task,
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    const updatedProject = {
-      ...project,
-      tasks: [...(project.tasks || []), newTask],
-    };
-
-    return Promise.resolve(newTask);
+      console.log("Nova tarefa criada:", newTask); // Debug
+      return Promise.resolve(newTask);
+    } catch (error) {
+      console.error("Erro ao adicionar tarefa:", error);
+      return Promise.reject(error);
+    }
   },
 
   updateTask: async (projectId: string, taskId: string, taskData: Partial<Task>): Promise<Task | undefined> => {
-    const projects = getProjects();
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return Promise.resolve(undefined);
+    try {
+      const projects = getProjects();
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        console.log("Projeto não encontrado para atualizar tarefa:", projectId); // Debug
+        return Promise.resolve(undefined);
+      }
 
-    const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return Promise.resolve(undefined);
+      const taskIndex = project.tasks.findIndex(t => t.id === taskId);
+      if (taskIndex === -1) {
+        console.log("Tarefa não encontrada para atualização:", taskId); // Debug
+        return Promise.resolve(undefined);
+      }
 
-    const updatedTask = {
-      ...project.tasks[taskIndex],
-      ...taskData,
-      updatedAt: new Date().toISOString(),
-    };
+      const updatedTask = {
+        ...project.tasks[taskIndex],
+        ...taskData,
+        updatedAt: new Date().toISOString(),
+      };
 
-    const updatedTasks = project.tasks.map((t, index) => index === taskIndex ? updatedTask : t);
-    const updatedProject = {
-      ...project,
-      tasks: updatedTasks,
-    };
-
-    return Promise.resolve(updatedTask);
+      console.log("Tarefa atualizada:", updatedTask); // Debug
+      return Promise.resolve(updatedTask);
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+      return Promise.reject(error);
+    }
   },
 
   deleteTask: async (projectId: string, taskId: string): Promise<boolean> => {
-    const projects = getProjects();
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return Promise.resolve(false);
+    try {
+      const projects = getProjects();
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        console.log("Projeto não encontrado para excluir tarefa:", projectId); // Debug
+        return Promise.resolve(false);
+      }
 
-    const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return Promise.resolve(false);
+      const taskIndex = project.tasks.findIndex(t => t.id === taskId);
+      if (taskIndex === -1) {
+        console.log("Tarefa não encontrada para exclusão:", taskId); // Debug
+        return Promise.resolve(false);
+      }
 
-    const updatedTasks = project.tasks.filter((_, index) => index !== taskIndex);
-    const updatedProject = {
-      ...project,
-      tasks: updatedTasks,
-    };
-
-    return Promise.resolve(true);
+      return Promise.resolve(true);
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
+      return Promise.reject(error);
+    }
   },
 };
