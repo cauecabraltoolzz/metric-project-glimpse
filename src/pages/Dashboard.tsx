@@ -26,9 +26,9 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Projects Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Painel de Projetos</h1>
         <p className="text-muted-foreground">
-          Overview of all project health metrics
+          Visão geral de todas as métricas de saúde dos projetos
         </p>
       </div>
 
@@ -36,19 +36,19 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm font-medium text-muted-foreground">
-            Total Projects
+            Total de Projetos
           </div>
           <div className="text-2xl font-bold">{projects.length}</div>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm font-medium text-muted-foreground">
-            Average Health Score
+            Média de Health Score
           </div>
           <div className="text-2xl font-bold">{avgHealthScore}%</div>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm font-medium text-muted-foreground">
-            Projects at Risk
+            Projetos em Risco
           </div>
           <div className="text-2xl font-bold">{atRiskProjects}</div>
         </div>
@@ -58,7 +58,7 @@ const Dashboard = () => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search projects by name or client..."
+          placeholder="Buscar projetos por nome ou cliente..."
           className="pl-9"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -73,7 +73,7 @@ const Dashboard = () => {
         
         {filteredProjects.length === 0 && (
           <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground">No projects found matching your search.</p>
+            <p className="text-muted-foreground">Nenhum projeto encontrado para sua busca.</p>
           </div>
         )}
       </div>

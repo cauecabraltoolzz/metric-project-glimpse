@@ -18,19 +18,19 @@ const ProjectDetail = () => {
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
+        <h1 className="text-2xl font-bold mb-4">Projeto Não Encontrado</h1>
         <p className="text-muted-foreground mb-6">
-          The project you're looking for doesn't exist or has been removed.
+          O projeto que você está procurando não existe ou foi removido.
         </p>
         <Button onClick={() => navigate("/")}>
-          Return to Dashboard
+          Voltar ao Painel
         </Button>
       </div>
     );
   }
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
       year: 'numeric', 
       month: 'long', 
       day: 'numeric'
@@ -39,8 +39,8 @@ const ProjectDetail = () => {
   
   const handleExportReport = () => {
     toast({
-      title: "Report Export",
-      description: "Project report has been exported successfully.",
+      title: "Relatório Exportado",
+      description: "O relatório do projeto foi exportado com sucesso.",
     });
   };
 
@@ -57,12 +57,12 @@ const ProjectDetail = () => {
             <h1 className="text-2xl font-bold">{project.name}</h1>
           </div>
           <p className="text-muted-foreground">
-            {project.client} • Started {formatDate(project.startDate)}
+            {project.client} • Iniciado em {formatDate(project.startDate)}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <HealthScoreBadge score={project.healthScore} size="lg" />
-          <Button onClick={handleExportReport}>Export Report</Button>
+          <Button onClick={handleExportReport}>Exportar Relatório</Button>
         </div>
       </div>
 
@@ -74,26 +74,26 @@ const ProjectDetail = () => {
       </div>
 
       <div className="rounded-lg border bg-card p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">Health Score Analysis</h2>
+        <h2 className="text-xl font-semibold mb-4">Análise do Health Score</h2>
         <p className="text-sm text-muted-foreground mb-3">
-          The project health score is calculated based on weighted metrics:
+          O health score do projeto é calculado com base nas métricas ponderadas:
         </p>
         <ul className="space-y-2 text-sm">
           <li className="flex justify-between">
-            <span>Delivery Rate (30%)</span>
-            <span>{project.metrics.deliveryRate.value}% vs {project.metrics.deliveryRate.target}% target</span>
+            <span>Taxa de Entregas (30%)</span>
+            <span>{project.metrics.deliveryRate.value}% vs {project.metrics.deliveryRate.target}% meta</span>
           </li>
           <li className="flex justify-between">
-            <span>Rework Rate (25%)</span>
-            <span>{project.metrics.reworkRate.value}% vs {project.metrics.reworkRate.target}% target</span>
+            <span>Taxa de Retrabalho (25%)</span>
+            <span>{project.metrics.reworkRate.value}% vs {project.metrics.reworkRate.target}% meta</span>
           </li>
           <li className="flex justify-between">
-            <span>Estimate Accuracy (25%)</span>
-            <span>{project.metrics.estimateAccuracy.value}% vs {project.metrics.estimateAccuracy.target}% target</span>
+            <span>Precisão das Estimativas (25%)</span>
+            <span>{project.metrics.estimateAccuracy.value}% vs {project.metrics.estimateAccuracy.target}% meta</span>
           </li>
           <li className="flex justify-between">
-            <span>NPS Score (20%)</span>
-            <span>{project.metrics.nps.value}% vs {project.metrics.nps.target}% target</span>
+            <span>Pontuação NPS (20%)</span>
+            <span>{project.metrics.nps.value}% vs {project.metrics.nps.target}% meta</span>
           </li>
         </ul>
       </div>

@@ -6,20 +6,20 @@ const Reports = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
         <p className="text-muted-foreground">
-          View and generate project health reports
+          Visualize e gere relatórios de saúde dos projetos
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Report functionality coming soon</CardTitle>
+          <CardTitle>Funcionalidade de relatórios em breve</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            This feature will allow you to generate detailed reports about project health metrics,
-            with advanced filtering and export options.
+            Essa funcionalidade permitirá gerar relatórios detalhados sobre métricas de saúde dos projetos,
+            com opções avançadas de filtragem e exportação.
           </p>
         </CardContent>
       </Card>

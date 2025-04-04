@@ -37,17 +37,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       to: "/",
       icon: <Grid2X2 className="h-5 w-5" />,
-      label: "Dashboard",
+      label: "Painel",
     },
     {
       to: "/reports",
       icon: <FileText className="h-5 w-5" />,
-      label: "Reports",
+      label: "Relatórios",
     },
     {
       to: "/settings",
       icon: <Settings className="h-5 w-5" />,
-      label: "Settings",
+      label: "Configurações",
     },
   ];
 
@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }`}
       >
         <div className="border-b px-6 py-4">
-          <h1 className="text-xl font-semibold">Project Metrics</h1>
+          <h1 className="text-xl font-semibold">Métricas de Projeto</h1>
         </div>
         <nav className="flex-1 space-y-1 p-4">
           {navItems.map((item) => (
@@ -91,7 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
           </Button>
           <div className="sm:hidden">
-            <h1 className="text-xl font-semibold">Project Metrics</h1>
+            <h1 className="text-xl font-semibold">Métricas de Projeto</h1>
           </div>
         </div>
         
