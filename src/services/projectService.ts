@@ -131,40 +131,34 @@ export const getProjects = (): Project[] => {
       name: "Financial Dashboard",
       client: "Nubank",
       startDate: "2023-09-05",
+      duration: 12,
       healthScore: 0, // Will be calculated
       isNew: false,
+      tasks: [],
       metrics: {
-        deliveryRate: {
-          id: "deliveryRate",
-          name: "Delivery Rate",
+        velocity: {
+          id: "velocity",
+          name: "Velocidade",
           value: 70,
           target: 85,
           trend: "down",
-          weight: 0.3,
+          weight: 0.4,
         },
-        reworkRate: {
-          id: "reworkRate",
-          name: "Rework Rate",
-          value: 22, // Lower is better
-          target: 15,
-          trend: "up",
-          weight: 0.25,
-        },
-        estimateAccuracy: {
-          id: "estimateAccuracy",
-          name: "Estimate Accuracy",
+        quality: {
+          id: "quality",
+          name: "Qualidade",
           value: 65,
           target: 80,
           trend: "down",
-          weight: 0.25,
+          weight: 0.3,
         },
-        nps: {
-          id: "nps",
-          name: "NPS Score",
+        engagement: {
+          id: "engagement",
+          name: "Engajamento",
           value: 55,
           target: 70,
           trend: "down",
-          weight: 0.2,
+          weight: 0.3,
         },
       },
     },
@@ -173,40 +167,34 @@ export const getProjects = (): Project[] => {
       name: "Logistics Tracker",
       client: "Mercado Livre",
       startDate: "2024-02-20",
+      duration: 9,
       healthScore: 0, // Will be calculated
       isNew: false,
+      tasks: [],
       metrics: {
-        deliveryRate: {
-          id: "deliveryRate",
-          name: "Delivery Rate",
+        velocity: {
+          id: "velocity",
+          name: "Velocidade",
           value: 80,
           target: 85,
           trend: "stable",
-          weight: 0.3,
+          weight: 0.4,
         },
-        reworkRate: {
-          id: "reworkRate",
-          name: "Rework Rate",
-          value: 15, // Lower is better
-          target: 15,
-          trend: "stable",
-          weight: 0.25,
-        },
-        estimateAccuracy: {
-          id: "estimateAccuracy",
-          name: "Estimate Accuracy",
+        quality: {
+          id: "quality",
+          name: "Qualidade",
           value: 75,
           target: 80,
           trend: "up",
-          weight: 0.25,
+          weight: 0.3,
         },
-        nps: {
-          id: "nps",
-          name: "NPS Score",
+        engagement: {
+          id: "engagement",
+          name: "Engajamento",
           value: 68,
           target: 75,
           trend: "up",
-          weight: 0.2,
+          weight: 0.3,
         },
       },
     },
@@ -215,40 +203,34 @@ export const getProjects = (): Project[] => {
       name: "Social Network App",
       client: "LinkedIn BR",
       startDate: "2023-08-10",
+      duration: 15,
       healthScore: 0, // Will be calculated
       isNew: false,
+      tasks: [],
       metrics: {
-        deliveryRate: {
-          id: "deliveryRate",
-          name: "Delivery Rate",
+        velocity: {
+          id: "velocity",
+          name: "Velocidade",
           value: 88,
           target: 90,
           trend: "stable",
-          weight: 0.3,
+          weight: 0.4,
         },
-        reworkRate: {
-          id: "reworkRate",
-          name: "Rework Rate",
-          value: 11, // Lower is better
-          target: 10,
-          trend: "down",
-          weight: 0.25,
-        },
-        estimateAccuracy: {
-          id: "estimateAccuracy",
-          name: "Estimate Accuracy",
+        quality: {
+          id: "quality",
+          name: "Qualidade",
           value: 82,
           target: 85,
           trend: "up",
-          weight: 0.25,
+          weight: 0.3,
         },
-        nps: {
-          id: "nps",
-          name: "NPS Score",
+        engagement: {
+          id: "engagement",
+          name: "Engajamento",
           value: 72,
           target: 75,
           trend: "up",
-          weight: 0.2,
+          weight: 0.3,
         },
       },
     },
@@ -297,21 +279,21 @@ export const getHealthScoreClassification = (score: number): {
 
 export const projectService = {
   getProjects: async (): Promise<Project[]> => {
-    return getProjects();
+    return Promise.resolve(getProjects());
   },
 
   getProjectById: async (id: string): Promise<Project | undefined> => {
-    return getProjectById(id);
+    return Promise.resolve(getProjectById(id));
   },
 
   createProject: async (projectData: Omit<Project, "id" | "healthScore" | "isNew">): Promise<Project> => {
-    return createProject(projectData as any);
+    return Promise.resolve(createProject(projectData));
   },
 
   updateProject: async (id: string, projectData: Partial<Project>): Promise<Project | undefined> => {
     const projects = getProjects();
     const projectIndex = projects.findIndex(project => project.id === id);
-    if (projectIndex === -1) return undefined;
+    if (projectIndex === -1) return Promise.resolve(undefined);
 
     const updatedProject = {
       ...projects[projectIndex],
@@ -327,22 +309,22 @@ export const projectService = {
       ...projects.slice(projectIndex + 1),
     ];
 
-    return updatedProjects[projectIndex];
+    return Promise.resolve(updatedProject);
   },
 
   deleteProject: async (id: string): Promise<boolean> => {
     const projects = getProjects();
     const projectIndex = projects.findIndex(project => project.id === id);
-    if (projectIndex === -1) return false;
+    if (projectIndex === -1) return Promise.resolve(false);
 
     const updatedProjects = projects.filter((_, index) => index !== projectIndex);
-    return true;
+    return Promise.resolve(true);
   },
 
   addTask: async (projectId: string, task: Omit<Task, "id" | "createdAt" | "updatedAt">): Promise<Task | undefined> => {
     const projects = getProjects();
     const project = projects.find(p => p.id === projectId);
-    if (!project) return undefined;
+    if (!project) return Promise.resolve(undefined);
 
     const newTask: Task = {
       ...task,
@@ -353,20 +335,19 @@ export const projectService = {
 
     const updatedProject = {
       ...project,
-      tasks: [...project.tasks, newTask],
+      tasks: [...(project.tasks || []), newTask],
     };
 
-    const updatedProjects = projects.map(p => p.id === projectId ? updatedProject : p);
-    return newTask;
+    return Promise.resolve(newTask);
   },
 
   updateTask: async (projectId: string, taskId: string, taskData: Partial<Task>): Promise<Task | undefined> => {
     const projects = getProjects();
     const project = projects.find(p => p.id === projectId);
-    if (!project) return undefined;
+    if (!project) return Promise.resolve(undefined);
 
     const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return undefined;
+    if (taskIndex === -1) return Promise.resolve(undefined);
 
     const updatedTask = {
       ...project.tasks[taskIndex],
@@ -380,17 +361,16 @@ export const projectService = {
       tasks: updatedTasks,
     };
 
-    const updatedProjects = projects.map(p => p.id === projectId ? updatedProject : p);
-    return updatedTask;
+    return Promise.resolve(updatedTask);
   },
 
   deleteTask: async (projectId: string, taskId: string): Promise<boolean> => {
     const projects = getProjects();
     const project = projects.find(p => p.id === projectId);
-    if (!project) return false;
+    if (!project) return Promise.resolve(false);
 
     const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return false;
+    if (taskIndex === -1) return Promise.resolve(false);
 
     const updatedTasks = project.tasks.filter((_, index) => index !== taskIndex);
     const updatedProject = {
@@ -398,7 +378,6 @@ export const projectService = {
       tasks: updatedTasks,
     };
 
-    const updatedProjects = projects.map(p => p.id === projectId ? updatedProject : p);
-    return true;
+    return Promise.resolve(true);
   },
 };

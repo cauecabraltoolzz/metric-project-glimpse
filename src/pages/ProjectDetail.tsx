@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Project } from "@/types/project";
 import { projectService } from "@/services/projectService";
@@ -14,29 +14,125 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Info } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 
 export default function ProjectDetail() {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      const projectData = projectService.getProjectById(id);
-      setProject(projectData);
+    async function loadProject() {
+      try {
+        setIsLoading(true);
+        if (id) {
+          const projectData = await projectService.getProjectById(id);
+          if (projectData) {
+            setProject(projectData);
+          } else {
+            toast.error("Projeto não encontrado");
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar projeto:", error);
+        toast.error("Erro ao carregar projeto");
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    loadProject();
   }, [id]);
 
+  const handleAddTask = async (task: any) => {
+    if (id) {
+      try {
+        const newTask = await projectService.addTask(id, task);
+        if (newTask) {
+          const updatedProject = await projectService.getProjectById(id);
+          if (updatedProject) {
+            setProject(updatedProject);
+            toast.success("Tarefa adicionada com sucesso!");
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao adicionar tarefa:", error);
+        toast.error("Erro ao adicionar tarefa");
+      }
+    }
+  };
+
+  const handleUpdateTask = async (taskId: string, updates: any) => {
+    if (id) {
+      try {
+        const updatedTask = await projectService.updateTask(id, taskId, updates);
+        if (updatedTask) {
+          const updatedProject = await projectService.getProjectById(id);
+          if (updatedProject) {
+            setProject(updatedProject);
+            toast.success("Tarefa atualizada com sucesso!");
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar tarefa:", error);
+        toast.error("Erro ao atualizar tarefa");
+      }
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (id) {
+      try {
+        const success = await projectService.deleteTask(id, taskId);
+        if (success) {
+          const updatedProject = await projectService.getProjectById(id);
+          if (updatedProject) {
+            setProject(updatedProject);
+            toast.success("Tarefa removida com sucesso!");
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao remover tarefa:", error);
+        toast.error("Erro ao remover tarefa");
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    );
+  }
+
   if (!project) {
-    return <div>Projeto Não Encontrado</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-lg">Projeto não encontrado</div>
+        <Button asChild>
+          <Link to="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para o Dashboard
+          </Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{project.name}</h1>
-          <p className="text-muted-foreground">Cliente: {project.client}</p>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{project.name}</h1>
+            <p className="text-muted-foreground">Cliente: {project.client}</p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <HealthScoreBadge score={project.healthScore} size="lg" />
@@ -167,30 +263,9 @@ export default function ProjectDetail() {
         <CardContent>
           <TaskManager
             tasks={project.tasks || []}
-            onAddTask={(task) => {
-              if (id) {
-                projectService.addTask(id, task);
-                const updatedProject = projectService.getProjectById(id);
-                setProject(updatedProject);
-                toast.success("Tarefa adicionada com sucesso!");
-              }
-            }}
-            onUpdateTask={(taskId, updates) => {
-              if (id) {
-                projectService.updateTask(id, taskId, updates);
-                const updatedProject = projectService.getProjectById(id);
-                setProject(updatedProject);
-                toast.success("Tarefa atualizada com sucesso!");
-              }
-            }}
-            onDeleteTask={(taskId) => {
-              if (id) {
-                projectService.deleteTask(id, taskId);
-                const updatedProject = projectService.getProjectById(id);
-                setProject(updatedProject);
-                toast.success("Tarefa removida com sucesso!");
-              }
-            }}
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
           />
         </CardContent>
       </Card>

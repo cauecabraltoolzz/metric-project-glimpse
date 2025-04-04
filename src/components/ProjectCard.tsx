@@ -10,51 +10,69 @@ interface ProjectCardProps {
   project: Project;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  const getTrendIcon = (trend: string) => {
+export function ProjectCard({ project }: ProjectCardProps) {
+  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
-      case "up":
-        return <ArrowUp className="h-3 w-3 text-health-good" />;
-      case "down":
-        return <ArrowDown className="h-3 w-3 text-health-poor" />;
+      case 'up':
+        return <ArrowUp className="h-4 w-4 text-green-500" />;
+      case 'down':
+        return <ArrowDown className="h-4 w-4 text-red-500" />;
       default:
-        return <Circle className="h-3 w-3 text-health-average" />;
+        return <Circle className="h-4 w-4 text-yellow-500" />;
     }
   };
 
   return (
-    <Link to={`/project/${project.id}`}>
-      <Card className="h-full transition-all duration-200 hover:shadow-md">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-lg font-semibold">{project.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{project.client}</p>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <HealthScoreBadge score={project.healthScore} />
-              {project.isNew && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  Novo Projeto
-                </Badge>
-              )}
-            </div>
-          </div>
+    <Link to={`/project/${project.id}`} className="block transition-transform hover:scale-[1.02]">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-semibold">{project.name}</CardTitle>
+          <HealthScoreBadge score={project.healthScore} />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 mt-2">
-            {Object.values(project.metrics).map((metric) => (
-              <div key={metric.id} className="flex items-center gap-1.5">
-                <div className="text-xs font-medium flex items-center gap-1">
-                  {getTrendIcon(metric.trend)}
-                  <span>{metric.value}%</span>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Cliente</p>
+              <p className="font-medium">{project.client}</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-muted-foreground">Velocidade</p>
+                  {getTrendIcon(project.metrics.velocity.trend)}
                 </div>
-                <span className="text-xs text-muted-foreground">{metric.name}</span>
+                <p className="font-medium">{project.metrics.velocity.value}%</p>
               </div>
-            ))}
+
+              <div>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-muted-foreground">Qualidade</p>
+                  {getTrendIcon(project.metrics.quality.trend)}
+                </div>
+                <p className="font-medium">{project.metrics.quality.value}%</p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-muted-foreground">Engajamento</p>
+                  {getTrendIcon(project.metrics.engagement.trend)}
+                </div>
+                <p className="font-medium">{project.metrics.engagement.value}%</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">
+                {project.duration} meses
+              </Badge>
+              {project.isNew && (
+                <Badge variant="secondary">Novo</Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
     </Link>
   );
-};
+}
