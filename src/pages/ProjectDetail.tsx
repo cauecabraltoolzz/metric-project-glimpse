@@ -166,102 +166,108 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-6">
-        <div className="flex items-center gap-2">
-          <MetricCard metric={project.metrics.velocity} />
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <Info className="h-4 w-4" />
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium">Como é calculada a Velocidade?</h4>
-                <div className="text-sm space-y-1">
-                  <p>A velocidade é calculada com base em:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Pontos entregues por sprint</li>
-                    <li>Tempo médio de conclusão das tarefas</li>
-                    <li>Previsibilidade das entregas</li>
-                    <li>Cumprimento dos prazos estimados</li>
-                  </ul>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Meta: Entregar consistentemente os pontos planejados e manter ou melhorar o ritmo de entregas.
-                  </p>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <MetricCard metric={project.metrics.quality} />
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <Info className="h-4 w-4" />
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium">Como é calculada a Qualidade?</h4>
-                <div className="text-sm space-y-1">
-                  <p>A qualidade é medida através de:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Taxa de bugs em produção</li>
-                    <li>Cobertura de testes</li>
-                    <li>Débito técnico</li>
-                    <li>Code review approval rate</li>
-                    <li>Satisfação do usuário final</li>
-                  </ul>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Meta: Manter alta qualidade do código e minimizar problemas em produção.
-                  </p>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <MetricCard metric={project.metrics.engagement} />
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <Info className="h-4 w-4" />
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium">Como é calculado o Engajamento?</h4>
-                <div className="text-sm space-y-1">
-                  <p>O engajamento é calculado considerando:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Presença em reuniões (30%)</li>
-                    <li>Tempo de resposta em comunicações (20%)</li>
-                    <li>Contribuições semanais (25%)</li>
-                    <li>Feedback do time (25%)</li>
-                  </ul>
-                  <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                    <p><strong>Tempo de Resposta:</strong> 1h ou menos = 100%, 24h ou mais = 0%</p>
-                    <p><strong>Contribuições:</strong> 10+ por semana = 100%</p>
-                    <p><strong>Feedback:</strong> Avaliação média do time (0-100)</p>
+      <div className="grid gap-6 md:grid-cols-6">
+        {/* Grupo de Métricas Atuais - Lado Esquerdo */}
+        <div className="space-y-6 md:col-span-3">
+          <div className="flex items-center gap-2">
+            <MetricCard metric={project.metrics.velocity} />
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Como é calculada a Velocidade?</h4>
+                  <div className="text-sm space-y-1">
+                    <p>A velocidade é calculada com base em:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Pontos entregues por sprint</li>
+                      <li>Tempo médio de conclusão das tarefas</li>
+                      <li>Previsibilidade das entregas</li>
+                      <li>Cumprimento dos prazos estimados</li>
+                    </ul>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Meta: Entregar consistentemente os pontos planejados e manter ou melhorar o ritmo de entregas.
+                    </p>
                   </div>
                 </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <MetricCard metric={project.metrics.quality} />
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Como é calculada a Qualidade?</h4>
+                  <div className="text-sm space-y-1">
+                    <p>A qualidade é medida através de:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Taxa de bugs em produção</li>
+                      <li>Cobertura de testes</li>
+                      <li>Débito técnico</li>
+                      <li>Code review approval rate</li>
+                      <li>Satisfação do usuário final</li>
+                    </ul>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Meta: Manter alta qualidade do código e minimizar problemas em produção.
+                    </p>
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <MetricCard metric={project.metrics.engagement} />
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Como é calculado o Engajamento?</h4>
+                  <div className="text-sm space-y-1">
+                    <p>O engajamento é calculado considerando:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Presença em reuniões (30%)</li>
+                      <li>Tempo de resposta em comunicações (20%)</li>
+                      <li>Contribuições semanais (25%)</li>
+                      <li>Feedback do time (25%)</li>
+                    </ul>
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <p><strong>Tempo de Resposta:</strong> 1h ou menos = 100%, 24h ou mais = 0%</p>
+                      <p><strong>Contribuições:</strong> 10+ por semana = 100%</p>
+                      <p><strong>Feedback:</strong> Avaliação média do time (0-100)</p>
+                    </div>
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
         </div>
 
-        {[1, 2, 3].map((index) => (
-          <div key={index} className="border-2 border-dashed rounded-lg p-4 flex items-center justify-center">
-            <Button variant="ghost" className="h-full w-full flex flex-col gap-2 text-muted-foreground">
-              <Plus className="h-6 w-6" />
-              <span className="text-sm">Adicionar Métrica</span>
-            </Button>
-          </div>
-        ))}
+        {/* Espaços para Métricas Futuras - Lado Direito */}
+        <div className="grid gap-6 md:grid-cols-3 md:col-span-3">
+          {[1, 2, 3].map((index) => (
+            <div key={index} className="border-2 border-dashed rounded-lg p-4 flex items-center justify-center">
+              <Button variant="ghost" className="h-full w-full flex flex-col gap-2 text-muted-foreground">
+                <Plus className="h-6 w-6" />
+                <span className="text-sm">Adicionar Métrica</span>
+              </Button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Card>
