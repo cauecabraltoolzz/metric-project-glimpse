@@ -1,5 +1,5 @@
 
-import { Delivery } from "../types/project";
+import { Delivery, DeliveryStage } from "../types/project";
 import { getProjects } from "./projectService";
 
 // Mock data para entregas de projetos
