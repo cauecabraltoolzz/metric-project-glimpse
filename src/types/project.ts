@@ -21,3 +21,16 @@ export type Project = {
     nps: Metric;
   };
 };
+
+export type DeliveryStage = 'planning' | 'development' | 'testing' | 'review' | 'deployment';
+
+export type Delivery = {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  stage: DeliveryStage;
+  progress: number; // 0-100
+};
