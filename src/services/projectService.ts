@@ -1,4 +1,5 @@
 import { Project, Metric, Task } from "../types/project";
+import { v4 as uuidv4 } from "uuid";
 
 interface EngagementFactors {
   meetingAttendance: number; // Porcentagem de presença em reuniões (0-100)
@@ -46,392 +47,137 @@ export const calculateHealthScore = (metrics: { [key: string]: Metric }): number
   return Math.round(weightedSum / totalWeight);
 };
 
-// Mock data for projects
-export const getProjects = (): Project[] => {
-  const projects: Project[] = [
-    {
-      id: "1",
-      name: "Mobile App Redesign",
-      client: "Banco Inter",
-      startDate: "2024-01-15",
-      duration: 6,
-      healthScore: 0, // Will be calculated
-      isNew: false,
-      tasks: [],
-      metrics: {
-        velocity: {
-          id: "velocity",
-          name: "Velocidade",
-          value: 85,
-          target: 85,
-          trend: "up",
-          weight: 0.4,
-        },
-        quality: {
-          id: "quality",
-          name: "Qualidade",
-          value: 90,
-          target: 85,
-          trend: "up",
-          weight: 0.3,
-        },
-        engagement: {
-          id: "engagement",
-          name: "Engajamento",
-          value: 88,
-          target: 85,
-          trend: "stable",
-          weight: 0.3,
-        },
-      },
-      hours: {
-        sold: 120,
-        allocated: 100,
-      },
-    },
-    {
-      id: "2",
-      name: "E-commerce Platform",
-      client: "Magazine Luiza",
-      startDate: "2023-11-01",
-      duration: 8,
-      healthScore: 0, // Will be calculated
-      isNew: false,
-      tasks: [],
-      metrics: {
-        velocity: {
-          id: "velocity",
-          name: "Velocidade",
-          value: 75,
-          target: 85,
-          trend: "down",
-          weight: 0.4,
-        },
-        quality: {
-          id: "quality",
-          name: "Qualidade",
-          value: 82,
-          target: 85,
-          trend: "stable",
-          weight: 0.3,
-        },
-        engagement: {
-          id: "engagement",
-          name: "Engajamento",
-          value: 78,
-          target: 85,
-          trend: "down",
-          weight: 0.3,
-        },
-      },
-      hours: {
-        sold: 160,
-        allocated: 140,
-      },
-    },
-    {
-      id: "3",
-      name: "Financial Dashboard",
-      client: "Nubank",
-      startDate: "2023-09-05",
-      duration: 12,
-      healthScore: 0, // Will be calculated
-      isNew: false,
-      tasks: [],
-      metrics: {
-        velocity: {
-          id: "velocity",
-          name: "Velocidade",
-          value: 70,
-          target: 85,
-          trend: "down",
-          weight: 0.4,
-        },
-        quality: {
-          id: "quality",
-          name: "Qualidade",
-          value: 65,
-          target: 80,
-          trend: "down",
-          weight: 0.3,
-        },
-        engagement: {
-          id: "engagement",
-          name: "Engajamento",
-          value: 55,
-          target: 70,
-          trend: "down",
-          weight: 0.3,
-        },
-      },
-      hours: {
-        sold: 200,
-        allocated: 180,
-      },
-    },
-    {
-      id: "4",
-      name: "Logistics Tracker",
-      client: "Mercado Livre",
-      startDate: "2024-02-20",
-      duration: 9,
-      healthScore: 0, // Will be calculated
-      isNew: false,
-      tasks: [],
-      metrics: {
-        velocity: {
-          id: "velocity",
-          name: "Velocidade",
-          value: 80,
-          target: 85,
-          trend: "stable",
-          weight: 0.4,
-        },
-        quality: {
-          id: "quality",
-          name: "Qualidade",
-          value: 75,
-          target: 80,
-          trend: "up",
-          weight: 0.3,
-        },
-        engagement: {
-          id: "engagement",
-          name: "Engajamento",
-          value: 68,
-          target: 75,
-          trend: "up",
-          weight: 0.3,
-        },
-      },
-    },
-    {
-      id: "5",
-      name: "Social Network App",
-      client: "LinkedIn BR",
-      startDate: "2023-08-10",
-      duration: 15,
-      healthScore: 0, // Will be calculated
-      isNew: false,
-      tasks: [],
-      metrics: {
-        velocity: {
-          id: "velocity",
-          name: "Velocidade",
-          value: 88,
-          target: 90,
-          trend: "stable",
-          weight: 0.4,
-        },
-        quality: {
-          id: "quality",
-          name: "Qualidade",
-          value: 82,
-          target: 85,
-          trend: "up",
-          weight: 0.3,
-        },
-        engagement: {
-          id: "engagement",
-          name: "Engajamento",
-          value: 72,
-          target: 75,
-          trend: "up",
-          weight: 0.3,
-        },
-      },
-    },
-  ];
+const PROJECTS_KEY = "@metric-project:projects";
 
-  // Calculate health scores
-  return projects.map(project => ({
-    ...project,
-    healthScore: calculateHealthScore(project.metrics),
-  }));
-};
+function getProjects(): Project[] {
+  const savedProjects = localStorage.getItem(PROJECTS_KEY);
+  return savedProjects ? JSON.parse(savedProjects) : [];
+}
 
-// Get a specific project by ID
-export const getProjectById = async (id: string): Promise<Project> => {
-  const projects = await getProjects();
+async function getProjectById(id: string): Promise<Project> {
+  const projects = getProjects();
   const project = projects.find(p => p.id === id);
   if (!project) {
-    throw new Error(`Project with id ${id} not found`);
+    throw new Error(`Projeto não encontrado: ${id}`);
   }
   return project;
-};
+}
 
-// Create a new project
-export const createProject = (projectData: Omit<Project, 'id' | 'healthScore' | 'isNew'>): Project => {
+async function createProject(projectData: Omit<Project, "id" | "healthScore" | "isNew">): Promise<Project> {
+  const projects = getProjects();
   const newProject: Project = {
+    id: uuidv4(),
     ...projectData,
-    id: Math.random().toString(36).substr(2, 9), // Generate a random ID
-    healthScore: calculateHealthScore(projectData.metrics),
+    healthScore: 0,
     isNew: true,
+    metrics: {
+      velocity: {
+        id: uuidv4(),
+        name: "Velocidade",
+        value: projectData.metrics.velocity.target,
+        target: projectData.metrics.velocity.target,
+        trend: "stable",
+        weight: projectData.metrics.velocity.weight,
+      },
+      quality: {
+        id: uuidv4(),
+        name: "Qualidade",
+        value: projectData.metrics.quality.target,
+        target: projectData.metrics.quality.target,
+        trend: "stable",
+        weight: projectData.metrics.quality.weight,
+      },
+      engagement: {
+        id: uuidv4(),
+        name: "Engajamento",
+        value: projectData.metrics.engagement.target,
+        target: projectData.metrics.engagement.target,
+        trend: "stable",
+        weight: projectData.metrics.engagement.weight,
+      },
+    },
   };
 
+  newProject.healthScore = calculateHealthScore(newProject.metrics);
+  projects.push(newProject);
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
   return newProject;
-};
+}
 
-// Get health score classification
-export const getHealthScoreClassification = (score: number): {
-  label: string;
-  color: string;
-} => {
-  if (score >= 85) {
-    return { label: "Excellent", color: "health-excellent" };
-  } else if (score >= 70) {
-    return { label: "Good", color: "health-good" };
-  } else if (score >= 50) {
-    return { label: "Average", color: "health-average" };
-  } else {
-    return { label: "Poor", color: "health-poor" };
+async function addTask(projectId: string, task: Omit<Task, "id" | "createdAt" | "updatedAt">): Promise<Task> {
+  const projects = getProjects();
+  const projectIndex = projects.findIndex(p => p.id === projectId);
+  
+  if (projectIndex === -1) {
+    throw new Error(`Projeto não encontrado: ${projectId}`);
   }
-};
+
+  const newTask: Task = {
+    id: uuidv4(),
+    ...task,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  projects[projectIndex].tasks = projects[projectIndex].tasks || [];
+  projects[projectIndex].tasks.push(newTask);
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  return newTask;
+}
+
+async function updateTask(projectId: string, taskId: string, updates: Partial<Task>): Promise<Task> {
+  const projects = getProjects();
+  const projectIndex = projects.findIndex(p => p.id === projectId);
+  
+  if (projectIndex === -1) {
+    throw new Error(`Projeto não encontrado: ${projectId}`);
+  }
+
+  const taskIndex = projects[projectIndex].tasks?.findIndex(t => t.id === taskId);
+  
+  if (!taskIndex || taskIndex === -1) {
+    throw new Error(`Tarefa não encontrada: ${taskId}`);
+  }
+
+  const updatedTask = {
+    ...projects[projectIndex].tasks[taskIndex],
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+
+  projects[projectIndex].tasks[taskIndex] = updatedTask;
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  return updatedTask;
+}
+
+async function deleteTask(projectId: string, taskId: string): Promise<boolean> {
+  const projects = getProjects();
+  const projectIndex = projects.findIndex(p => p.id === projectId);
+  
+  if (projectIndex === -1) {
+    throw new Error(`Projeto não encontrado: ${projectId}`);
+  }
+
+  if (!projects[projectIndex].tasks) {
+    return false;
+  }
+
+  const taskIndex = projects[projectIndex].tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) {
+    return false;
+  }
+
+  projects[projectIndex].tasks.splice(taskIndex, 1);
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  return true;
+}
 
 export const projectService = {
-  getProjects: async (): Promise<Project[]> => {
-    try {
-      const projects = getProjects();
-      console.log("Projetos carregados:", projects); // Debug
-      return Promise.resolve(projects);
-    } catch (error) {
-      console.error("Erro ao carregar projetos:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  getProjectById: async (id: string): Promise<Project> => {
-    const projects = await getProjects();
-    const project = projects.find(p => p.id === id);
-    if (!project) {
-      throw new Error(`Project with id ${id} not found`);
-    }
-    return project;
-  },
-
-  createProject: async (projectData: Omit<Project, "id" | "healthScore" | "isNew">): Promise<Project> => {
-    try {
-      const newProject = createProject(projectData);
-      return Promise.resolve(newProject);
-    } catch (error) {
-      console.error("Erro ao criar projeto:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  updateProject: async (id: string, projectData: Partial<Project>): Promise<Project | undefined> => {
-    try {
-      const projects = getProjects();
-      const projectIndex = projects.findIndex(project => project.id === id);
-      if (projectIndex === -1) {
-        console.log("Projeto não encontrado para atualização:", id); // Debug
-        return Promise.resolve(undefined);
-      }
-
-      const updatedProject = {
-        ...projects[projectIndex],
-        ...projectData,
-        healthScore: projectData.metrics 
-          ? calculateHealthScore(projectData.metrics)
-          : projects[projectIndex].healthScore,
-      };
-
-      console.log("Projeto atualizado:", updatedProject); // Debug
-      return Promise.resolve(updatedProject);
-    } catch (error) {
-      console.error("Erro ao atualizar projeto:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  deleteProject: async (id: string): Promise<boolean> => {
-    try {
-      const projects = getProjects();
-      const projectIndex = projects.findIndex(project => project.id === id);
-      if (projectIndex === -1) {
-        console.log("Projeto não encontrado para exclusão:", id); // Debug
-        return Promise.resolve(false);
-      }
-
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Erro ao excluir projeto:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  addTask: async (projectId: string, task: Omit<Task, "id" | "createdAt" | "updatedAt">): Promise<Task | undefined> => {
-    try {
-      const projects = getProjects();
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        console.log("Projeto não encontrado para adicionar tarefa:", projectId); // Debug
-        return Promise.resolve(undefined);
-      }
-
-      const newTask: Task = {
-        ...task,
-        id: Math.random().toString(36).substr(2, 9),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      console.log("Nova tarefa criada:", newTask); // Debug
-      return Promise.resolve(newTask);
-    } catch (error) {
-      console.error("Erro ao adicionar tarefa:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  updateTask: async (projectId: string, taskId: string, taskData: Partial<Task>): Promise<Task | undefined> => {
-    try {
-      const projects = getProjects();
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        console.log("Projeto não encontrado para atualizar tarefa:", projectId); // Debug
-        return Promise.resolve(undefined);
-      }
-
-      const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-      if (taskIndex === -1) {
-        console.log("Tarefa não encontrada para atualização:", taskId); // Debug
-        return Promise.resolve(undefined);
-      }
-
-      const updatedTask = {
-        ...project.tasks[taskIndex],
-        ...taskData,
-        updatedAt: new Date().toISOString(),
-      };
-
-      console.log("Tarefa atualizada:", updatedTask); // Debug
-      return Promise.resolve(updatedTask);
-    } catch (error) {
-      console.error("Erro ao atualizar tarefa:", error);
-      return Promise.reject(error);
-    }
-  },
-
-  deleteTask: async (projectId: string, taskId: string): Promise<boolean> => {
-    try {
-      const projects = getProjects();
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        console.log("Projeto não encontrado para excluir tarefa:", projectId); // Debug
-        return Promise.resolve(false);
-      }
-
-      const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-      if (taskIndex === -1) {
-        console.log("Tarefa não encontrada para exclusão:", taskId); // Debug
-        return Promise.resolve(false);
-      }
-
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Erro ao excluir tarefa:", error);
-      return Promise.reject(error);
-    }
-  },
+  getProjects,
+  getProjectById,
+  createProject,
+  addTask,
+  updateTask,
+  deleteTask,
 };
