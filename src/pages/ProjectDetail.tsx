@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HealthScoreBadge } from "@/components/HealthScoreBadge";
 import { MetricCard } from "@/components/MetricCard";
 import { TaskManager } from "@/components/TaskManager";
+import { ProjectHoursSummary } from "@/components/ProjectHoursSummary";
+import { useTeamConfig } from "@/hooks/use-team-config";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   HoverCard,
@@ -22,50 +24,24 @@ export default function ProjectDetail() {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { totalHoursPerMonth } = useTeamConfig();
 
   useEffect(() => {
-    let isMounted = true;
-
     async function loadProject() {
-      if (!id) {
-        setError("ID do projeto não fornecido");
-        setIsLoading(false);
-        return;
-      }
-
       try {
         setIsLoading(true);
-        setError(null);
-        console.log("Carregando projeto com ID:", id); // Debug
-        const projectData = await projectService.getProjectById(id);
-        console.log("Dados do projeto:", projectData); // Debug
-        
-        if (isMounted) {
-          if (projectData) {
-            setProject(projectData);
-          } else {
-            setError("Projeto não encontrado");
-            toast.error("Projeto não encontrado");
-          }
-        }
+        if (!id) throw new Error("ID do projeto não fornecido");
+        const data = await projectService.getProjectById(id);
+        setProject(data);
       } catch (error) {
-        console.error("Erro ao carregar projeto:", error);
-        if (isMounted) {
-          setError("Erro ao carregar projeto");
-          toast.error("Erro ao carregar projeto");
-        }
+        setError("Erro ao carregar projeto");
+        console.error(error);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     }
 
     loadProject();
-
-    return () => {
-      isMounted = false;
-    };
   }, [id]);
 
   const handleAddTask = async (task: any) => {
@@ -130,23 +106,20 @@ export default function ProjectDetail() {
     );
   }
 
-  if (!project) {
+  if (error || !project) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="text-lg">Projeto não encontrado</div>
-        <Button asChild>
-          <Link to="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Dashboard
-          </Link>
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="text-lg text-red-500">{error || "Projeto não encontrado"}</div>
+        <Button onClick={() => navigate("/")} variant="outline" className="mt-4">
+          Voltar para Dashboard
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" asChild>
             <Link to="/">
@@ -154,16 +127,33 @@ export default function ProjectDetail() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            <p className="text-muted-foreground">Cliente: {project.client}</p>
+            <h1 className="text-2xl font-bold">{project.name}</h1>
+            <p className="text-muted-foreground">{project.client}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <HealthScoreBadge score={project.healthScore} size="lg" />
-          <Button onClick={() => toast.success("Relatório exportado com sucesso!")}>
-            Exportar Relatório
-          </Button>
-        </div>
+        <HealthScoreBadge score={project.healthScore} />
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <ProjectHoursSummary project={project} teamHoursPerMonth={totalHoursPerMonth} />
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações do Projeto</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium mb-1">Data de Início</p>
+                <p>{new Date(project.startDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1">Duração</p>
+                <p>{project.duration} meses</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-6">

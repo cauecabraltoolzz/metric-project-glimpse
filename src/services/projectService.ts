@@ -51,8 +51,8 @@ export const getProjects = (): Project[] => {
   const projects: Project[] = [
     {
       id: "1",
-      name: "Food Delivery App",
-      client: "iFood",
+      name: "Mobile App Redesign",
+      client: "Banco Inter",
       startDate: "2024-01-15",
       duration: 6,
       healthScore: 0, // Will be calculated
@@ -63,31 +63,30 @@ export const getProjects = (): Project[] => {
           id: "velocity",
           name: "Velocidade",
           value: 85,
-          target: 90,
+          target: 85,
           trend: "up",
           weight: 0.4,
         },
         quality: {
           id: "quality",
           name: "Qualidade",
-          value: 88,
-          target: 90,
+          value: 90,
+          target: 85,
           trend: "up",
           weight: 0.3,
         },
         engagement: {
           id: "engagement",
           name: "Engajamento",
-          value: calculateEngagement({
-            meetingAttendance: 95, // 95% de presença em reuniões
-            responseTime: 2, // 2 horas em média para responder
-            contributions: 8, // 8 contribuições por semana
-            teamFeedback: 90 // Feedback positivo do time
-          }),
-          target: 90,
-          trend: "up",
+          value: 88,
+          target: 85,
+          trend: "stable",
           weight: 0.3,
         },
+      },
+      hours: {
+        sold: 120,
+        allocated: 100,
       },
     },
     {
@@ -125,6 +124,10 @@ export const getProjects = (): Project[] => {
           weight: 0.3,
         },
       },
+      hours: {
+        sold: 160,
+        allocated: 140,
+      },
     },
     {
       id: "3",
@@ -160,6 +163,10 @@ export const getProjects = (): Project[] => {
           trend: "down",
           weight: 0.3,
         },
+      },
+      hours: {
+        sold: 200,
+        allocated: 180,
       },
     },
     {
@@ -244,9 +251,13 @@ export const getProjects = (): Project[] => {
 };
 
 // Get a specific project by ID
-export const getProjectById = (id: string): Project | undefined => {
-  const projects = getProjects();
-  return projects.find(project => project.id === id);
+export const getProjectById = async (id: string): Promise<Project> => {
+  const projects = await getProjects();
+  const project = projects.find(p => p.id === id);
+  if (!project) {
+    throw new Error(`Project with id ${id} not found`);
+  }
+  return project;
 };
 
 // Create a new project
@@ -289,16 +300,13 @@ export const projectService = {
     }
   },
 
-  getProjectById: async (id: string): Promise<Project | undefined> => {
-    try {
-      console.log("Buscando projeto com ID:", id); // Debug
-      const project = getProjectById(id);
-      console.log("Projeto encontrado:", project); // Debug
-      return Promise.resolve(project);
-    } catch (error) {
-      console.error("Erro ao buscar projeto:", error);
-      return Promise.reject(error);
+  getProjectById: async (id: string): Promise<Project> => {
+    const projects = await getProjects();
+    const project = projects.find(p => p.id === id);
+    if (!project) {
+      throw new Error(`Project with id ${id} not found`);
     }
+    return project;
   },
 
   createProject: async (projectData: Omit<Project, "id" | "healthScore" | "isNew">): Promise<Project> => {

@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useTeamConfig } from "@/hooks/use-team-config";
 import {
   Collapsible,
   CollapsibleContent,
@@ -14,6 +14,7 @@ import { ChevronDown } from "lucide-react";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { config, updateConfig, totalHoursPerMonth } = useTeamConfig();
   
   const [metrics, setMetrics] = React.useState({
     deliveryRate: { weight: 0.3, target: 90 },
@@ -39,6 +40,13 @@ const Settings = () => {
     }
   };
 
+  const handleTeamConfigChange = (field: keyof typeof config, value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      updateConfig({ [field]: numValue });
+    }
+  };
+
   const handleSave = () => {
     // Aqui seria a lógica para salvar as configurações
     // Em uma aplicação real, isso enviaria dados para uma API
@@ -61,6 +69,57 @@ const Settings = () => {
           Configure preferências de aplicação e métricas de projetos
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuração do Time</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Configure a capacidade do time para cálculo de horas disponíveis
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Número de Desenvolvedores</label>
+              <Input 
+                type="number"
+                min="0"
+                value={config.developers}
+                onChange={(e) => handleTeamConfigChange("developers", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Horas por Dia</label>
+              <Input 
+                type="number"
+                min="1"
+                max="8"
+                value={config.hoursPerDay}
+                onChange={(e) => handleTeamConfigChange("hoursPerDay", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Dias Úteis por Mês</label>
+              <Input 
+                type="number"
+                min="1"
+                max="23"
+                value={config.workingDays}
+                onChange={(e) => handleTeamConfigChange("workingDays", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-md bg-blue-50 p-4 border border-blue-200">
+            <p className="text-sm text-blue-800">
+              Total de horas disponíveis por mês: <strong>{totalHoursPerMonth} horas</strong>
+            </p>
+            <p className="text-sm text-blue-600 mt-1">
+              Baseado em {config.developers} desenvolvedores trabalhando {config.hoursPerDay} horas por dia em {config.workingDays} dias úteis
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

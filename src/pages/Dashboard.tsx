@@ -4,11 +4,14 @@ import { ProjectCard } from "../components/ProjectCard";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Project } from "@/types/project";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTeamConfig } from "@/hooks/use-team-config";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { totalHoursPerMonth } = useTeamConfig();
 
   useEffect(() => {
     async function loadProjects() {
@@ -42,6 +45,11 @@ const Dashboard = () => {
   const excellentProjects = projects.filter(project => project.healthScore >= 85).length;
   const atRiskProjects = projects.filter(project => project.healthScore < 50).length;
 
+  // Calculate hours statistics
+  const totalSoldHours = projects.reduce((sum, project) => sum + project.hours.sold, 0);
+  const totalAllocatedHours = projects.reduce((sum, project) => sum + project.hours.allocated, 0);
+  const hoursUtilization = (totalAllocatedHours / totalHoursPerMonth) * 100;
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -51,48 +59,82 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Visão geral dos projetos</p>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar projetos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Visão geral dos seus projetos e métricas
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border p-3">
-          <div className="text-sm font-medium">Health Score Médio</div>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold">{avgHealthScore}%</span>
-          </div>
-        </div>
-        <div className="rounded-lg border p-3">
-          <div className="text-sm font-medium">Projetos Excelentes</div>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold">{excellentProjects}</span>
-            <span className="text-sm text-muted-foreground">
-              projetos com score ≥ 85%
-            </span>
-          </div>
-        </div>
-        <div className="rounded-lg border p-3">
-          <div className="text-sm font-medium">Projetos em Risco</div>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold">{atRiskProjects}</span>
-            <span className="text-sm text-muted-foreground">
-              projetos com score < 50%
-            </span>
-          </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Health Score Médio
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgHealthScore}%</div>
+            <p className="text-xs text-muted-foreground">
+              {excellentProjects} projetos excelentes • {atRiskProjects} em risco
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Horas Vendidas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalSoldHours}h</div>
+            <p className="text-xs text-muted-foreground">
+              Total por mês em {projects.length} projetos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Horas Alocadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalAllocatedHours}h</div>
+            <p className="text-xs text-muted-foreground">
+              {hoursUtilization.toFixed(1)}% da capacidade total
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Capacidade Disponível
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {Math.max(0, totalHoursPerMonth - totalAllocatedHours)}h
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {Math.max(0, 100 - hoursUtilization).toFixed(1)}% livre
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Search className="h-5 w-5 text-muted-foreground" />
+        <Input
+          placeholder="Buscar projetos..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="h-9"
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

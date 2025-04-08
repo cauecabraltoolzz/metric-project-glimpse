@@ -3,7 +3,7 @@ import { Project } from "../types/project";
 import { HealthScoreBadge } from "./HealthScoreBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { ArrowUp, ArrowDown, Circle } from "lucide-react";
+import { ArrowUp, ArrowDown, Circle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ProjectCardProps {
@@ -30,35 +30,38 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <HealthScoreBadge score={project.healthScore} />
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="grid gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">Cliente</p>
-              <p className="font-medium">{project.client}</p>
+              <p className="text-sm text-muted-foreground">{project.client}</p>
+              <div className="mt-1 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  {project.hours.allocated}h/{project.hours.sold}h por mês
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div>
+                <p className="text-xs font-medium mb-1">Velocidade</p>
                 <div className="flex items-center gap-1">
-                  <p className="text-sm text-muted-foreground">Velocidade</p>
+                  <span className="text-sm">{project.metrics.velocity.value}%</span>
                   {getTrendIcon(project.metrics.velocity.trend)}
                 </div>
-                <p className="font-medium">{project.metrics.velocity.value}%</p>
               </div>
-
               <div>
+                <p className="text-xs font-medium mb-1">Qualidade</p>
                 <div className="flex items-center gap-1">
-                  <p className="text-sm text-muted-foreground">Qualidade</p>
+                  <span className="text-sm">{project.metrics.quality.value}%</span>
                   {getTrendIcon(project.metrics.quality.trend)}
                 </div>
-                <p className="font-medium">{project.metrics.quality.value}%</p>
               </div>
-
               <div>
+                <p className="text-xs font-medium mb-1">Engajamento</p>
                 <div className="flex items-center gap-1">
-                  <p className="text-sm text-muted-foreground">Engajamento</p>
+                  <span className="text-sm">{project.metrics.engagement.value}%</span>
                   {getTrendIcon(project.metrics.engagement.trend)}
                 </div>
-                <p className="font-medium">{project.metrics.engagement.value}%</p>
               </div>
             </div>
 

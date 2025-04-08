@@ -22,6 +22,10 @@ export function NewProjectForm() {
       quality: { current: 0, target: 0, weight: 0.3 },
       engagement: { current: 0, target: 0, weight: 0.3 },
     },
+    hours: {
+      sold: 0,
+      allocated: 0,
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,7 +88,7 @@ export function NewProjectForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="startDate">Data de Início</Label>
             <Input
@@ -103,6 +107,25 @@ export function NewProjectForm() {
               min="1"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="soldHours">Horas Vendidas/Mês</Label>
+            <Input
+              id="soldHours"
+              type="number"
+              min="0"
+              value={formData.hours.sold}
+              onChange={(e) => 
+                setFormData({
+                  ...formData,
+                  hours: {
+                    ...formData.hours,
+                    sold: parseInt(e.target.value)
+                  }
+                })
+              }
               required
             />
           </div>

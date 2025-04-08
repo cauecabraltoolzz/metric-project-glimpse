@@ -31,6 +31,10 @@ export interface Project {
     quality: Metric;
     engagement: Metric;
   };
+  hours: {
+    sold: number; // Horas vendidas por mês
+    allocated: number; // Horas alocadas por mês
+  };
 }
 
 export type DeliveryStage = 'planning' | 'development' | 'testing' | 'review' | 'deployment';
