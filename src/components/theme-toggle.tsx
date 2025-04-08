@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
@@ -13,7 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
+
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
+    try {
+      setTheme(newTheme)
+    } catch (error) {
+      console.error("Erro ao alterar tema:", error)
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -25,13 +31,13 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("light")}>
           Claro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
           Escuro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("system")}>
           Sistema
         </DropdownMenuItem>
       </DropdownMenuContent>
