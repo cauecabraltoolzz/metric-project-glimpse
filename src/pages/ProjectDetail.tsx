@@ -117,6 +117,18 @@ export default function ProjectDetail() {
     );
   }
 
+  const { hours } = project;
+  if (!hours) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="text-lg text-red-500">Dados do projeto incompletos</div>
+        <Button onClick={() => navigate("/")} variant="outline" className="mt-4">
+          Voltar para Dashboard
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

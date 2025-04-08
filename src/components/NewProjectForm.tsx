@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Project, Task } from "@/types/project";
+import { Project, Task, Metric } from "@/types/project";
 import { projectService } from "@/services/projectService";
 import { TaskManager } from "./TaskManager";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 export function NewProjectForm() {
   const navigate = useNavigate();
@@ -18,9 +19,30 @@ export function NewProjectForm() {
     startDate: "",
     duration: 0,
     metrics: {
-      velocity: { current: 0, target: 0, weight: 0.4 },
-      quality: { current: 0, target: 0, weight: 0.3 },
-      engagement: { current: 0, target: 0, weight: 0.3 },
+      velocity: {
+        id: uuidv4(),
+        name: "Velocidade",
+        value: 0,
+        target: 0,
+        weight: 0.4,
+        trend: "stable" as const,
+      },
+      quality: {
+        id: uuidv4(),
+        name: "Qualidade",
+        value: 0,
+        target: 0,
+        weight: 0.3,
+        trend: "stable" as const,
+      },
+      engagement: {
+        id: uuidv4(),
+        name: "Engajamento",
+        value: 0,
+        target: 0,
+        weight: 0.3,
+        trend: "stable" as const,
+      },
     },
     hours: {
       sold: 0,
@@ -44,24 +66,25 @@ export function NewProjectForm() {
   };
 
   const handleAddTask = async (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
-    const newTask = await projectService.addTask("temp", task);
-    if (newTask) {
-      setTasks([...tasks, newTask]);
-    }
+    const newTask: Task = {
+      ...task,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setTasks([...tasks, newTask]);
   };
 
   const handleUpdateTask = async (taskId: string, taskData: Partial<Task>) => {
-    const updatedTask = await projectService.updateTask("temp", taskId, taskData);
-    if (updatedTask) {
-      setTasks(tasks.map(task => task.id === taskId ? updatedTask : task));
-    }
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, ...taskData, updatedAt: new Date().toISOString() }
+        : task
+    ));
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    const success = await projectService.deleteTask("temp", taskId);
-    if (success) {
-      setTasks(tasks.filter(task => task.id !== taskId));
-    }
+    setTasks(tasks.filter(task => task.id !== taskId));
   };
 
   return (
@@ -149,6 +172,7 @@ export function NewProjectForm() {
                       ...formData.metrics,
                       velocity: {
                         ...formData.metrics.velocity,
+                        value: parseInt(e.target.value),
                         target: parseInt(e.target.value),
                       },
                     },
@@ -172,6 +196,7 @@ export function NewProjectForm() {
                       ...formData.metrics,
                       quality: {
                         ...formData.metrics.quality,
+                        value: parseInt(e.target.value),
                         target: parseInt(e.target.value),
                       },
                     },
@@ -195,6 +220,7 @@ export function NewProjectForm() {
                       ...formData.metrics,
                       engagement: {
                         ...formData.metrics.engagement,
+                        value: parseInt(e.target.value),
                         target: parseInt(e.target.value),
                       },
                     },

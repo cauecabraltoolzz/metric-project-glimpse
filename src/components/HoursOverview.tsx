@@ -8,8 +8,21 @@ interface HoursOverviewProps {
 }
 
 export function HoursOverview({ projects, teamHoursPerMonth }: HoursOverviewProps) {
-  const totalSoldHours = projects.reduce((sum, project) => sum + project.hours.sold, 0);
-  const totalAllocatedHours = projects.reduce((sum, project) => sum + project.hours.allocated, 0);
+  const totalSoldHours = projects.reduce((sum, project) => {
+    if (!project?.hours?.sold) {
+      console.warn(`Projeto sem horas vendidas: ${project?.name || 'Projeto desconhecido'}`);
+      return sum;
+    }
+    return sum + project.hours.sold;
+  }, 0);
+
+  const totalAllocatedHours = projects.reduce((sum, project) => {
+    if (!project?.hours?.allocated) {
+      console.warn(`Projeto sem horas alocadas: ${project?.name || 'Projeto desconhecido'}`);
+      return sum;
+    }
+    return sum + project.hours.allocated;
+  }, 0);
   const hoursUtilization = (totalAllocatedHours / teamHoursPerMonth) * 100;
   const availableHours = Math.max(0, teamHoursPerMonth - totalAllocatedHours);
 

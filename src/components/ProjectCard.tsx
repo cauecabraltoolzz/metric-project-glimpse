@@ -36,7 +36,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <div className="mt-1 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">
-                  {project.hours.allocated}h/{project.hours.sold}h por mês
+                  {project.hours?.allocated || 0}h/{project.hours?.sold || 0}h por mês
                 </span>
               </div>
             </div>

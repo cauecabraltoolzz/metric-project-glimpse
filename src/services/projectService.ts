@@ -49,9 +49,105 @@ export const calculateHealthScore = (metrics: { [key: string]: Metric }): number
 
 const PROJECTS_KEY = "@metric-project:projects";
 
+// Dados iniciais para testes
+const initialProjects: Project[] = [
+  {
+    id: uuidv4(),
+    name: "Mobile App Redesign",
+    client: "Banco Inter",
+    startDate: "2024-01-15",
+    duration: 6,
+    healthScore: 0,
+    isNew: false,
+    tasks: [],
+    metrics: {
+      velocity: {
+        id: uuidv4(),
+        name: "Velocidade",
+        value: 85,
+        target: 85,
+        trend: "up",
+        weight: 0.4,
+      },
+      quality: {
+        id: uuidv4(),
+        name: "Qualidade",
+        value: 90,
+        target: 85,
+        trend: "up",
+        weight: 0.3,
+      },
+      engagement: {
+        id: uuidv4(),
+        name: "Engajamento",
+        value: 88,
+        target: 85,
+        trend: "stable",
+        weight: 0.3,
+      },
+    },
+    hours: {
+      sold: 120,
+      allocated: 100,
+    },
+  },
+  {
+    id: uuidv4(),
+    name: "E-commerce Platform",
+    client: "Magazine Luiza",
+    startDate: "2023-11-01",
+    duration: 8,
+    healthScore: 0,
+    isNew: false,
+    tasks: [],
+    metrics: {
+      velocity: {
+        id: uuidv4(),
+        name: "Velocidade",
+        value: 75,
+        target: 85,
+        trend: "down",
+        weight: 0.4,
+      },
+      quality: {
+        id: uuidv4(),
+        name: "Qualidade",
+        value: 82,
+        target: 85,
+        trend: "stable",
+        weight: 0.3,
+      },
+      engagement: {
+        id: uuidv4(),
+        name: "Engajamento",
+        value: 78,
+        target: 85,
+        trend: "down",
+        weight: 0.3,
+      },
+    },
+    hours: {
+      sold: 160,
+      allocated: 140,
+    },
+  },
+];
+
 function getProjects(): Project[] {
   const savedProjects = localStorage.getItem(PROJECTS_KEY);
-  return savedProjects ? JSON.parse(savedProjects) : [];
+  if (!savedProjects) {
+    localStorage.setItem(PROJECTS_KEY, JSON.stringify(initialProjects));
+    return initialProjects;
+  }
+  const projects = JSON.parse(savedProjects);
+  // Garantir que todos os projetos têm a propriedade hours
+  return projects.map(project => ({
+    ...project,
+    hours: project.hours || {
+      sold: 0,
+      allocated: 0,
+    },
+  }));
 }
 
 async function getProjectById(id: string): Promise<Project> {
@@ -70,6 +166,7 @@ async function createProject(projectData: Omit<Project, "id" | "healthScore" | "
     ...projectData,
     healthScore: 0,
     isNew: true,
+    tasks: projectData.tasks || [],
     metrics: {
       velocity: {
         id: uuidv4(),
@@ -95,6 +192,10 @@ async function createProject(projectData: Omit<Project, "id" | "healthScore" | "
         trend: "stable",
         weight: projectData.metrics.engagement.weight,
       },
+    },
+    hours: {
+      sold: projectData.hours?.sold || 0,
+      allocated: projectData.hours?.allocated || 0,
     },
   };
 

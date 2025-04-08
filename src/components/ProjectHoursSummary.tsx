@@ -8,8 +8,22 @@ interface ProjectHoursSummaryProps {
 }
 
 export function ProjectHoursSummary({ project, teamHoursPerMonth }: ProjectHoursSummaryProps) {
-  const hoursUtilization = (project.hours.allocated / teamHoursPerMonth) * 100;
-  const hoursSoldUtilization = (project.hours.sold / teamHoursPerMonth) * 100;
+  if (!project.hours) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumo de Horas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Dados de horas não disponíveis</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { sold = 0, allocated = 0 } = project.hours;
+  const hoursUtilization = teamHoursPerMonth > 0 ? (allocated / teamHoursPerMonth) * 100 : 0;
+  const hoursSoldUtilization = teamHoursPerMonth > 0 ? (sold / teamHoursPerMonth) * 100 : 0;
 
   return (
     <Card>
@@ -20,14 +34,14 @@ export function ProjectHoursSummary({ project, teamHoursPerMonth }: ProjectHours
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium mb-1">Horas Vendidas/Mês</p>
-            <p className="text-2xl font-bold">{project.hours.sold}h</p>
+            <p className="text-2xl font-bold">{sold}h</p>
             <p className="text-sm text-muted-foreground">
               {hoursSoldUtilization.toFixed(1)}% da capacidade do time
             </p>
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Horas Alocadas/Mês</p>
-            <p className="text-2xl font-bold">{project.hours.allocated}h</p>
+            <p className="text-2xl font-bold">{allocated}h</p>
             <p className="text-sm text-muted-foreground">
               {hoursUtilization.toFixed(1)}% da capacidade do time
             </p>
